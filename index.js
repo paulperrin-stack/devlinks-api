@@ -1,6 +1,7 @@
 import express from 'express'
 import bcrypt from 'bcryptjs'
 import prisma from './prisma/client.js'
+import 'dotenv/config'
 
 const app = express()
 const port = 3000
@@ -22,6 +23,30 @@ app.post('/register', async (req, res) => {
         res.status(201).json(newUser);
     } catch (error) {
         res.status(400).json({ error: 'Email and/or username already exists or invalid data'})
+    }
+})
+
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const user = await prisma.user.findUnique({
+            where: { email }
+        });
+
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const matchPassword = await bcrypt.compare(password, user.password);
+
+        if (!matchPassword) {
+            return res.status(401).json({ error: 'Invalid credentials' });
+        }
+
+        return res.status(200).json({ message: 'Login successful' });
+    } catch (error) {
+        console.log(error.message);
+        return res.status(500).json({ message: 'Internal server error' });
     }
 })
 
