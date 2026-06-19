@@ -45,10 +45,32 @@ app.post('/login', async (req, res) => {
 
         return res.status(200).json({ message: 'Login successful' });
     } catch (error) {
-        console.log(error.message);
         return res.status(500).json({ message: 'Internal server error' });
     }
 })
+
+app.post('/links', async (req, res) => {
+    const { name, url, logoUrl, userId } = req.body;
+
+    if (!name || !url ) {
+        return res.status(400).json({ error: 'Name and url are required fields.'});
+    }
+
+    try {
+        const newLink = await prisma.link.create({
+            data: {
+                name,
+                url,
+                logoUrl,
+                userId,
+            }
+        });
+        res.status(201).json(newLink);
+    } catch (error) {
+        console.error(error.message);
+        res.status(400).json({ error: 'Name and/or url already exists or invalid data' });
+    }
+});
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
