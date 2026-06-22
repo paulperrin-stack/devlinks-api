@@ -72,6 +72,25 @@ app.post('/links', async (req, res) => {
     }
 });
 
+app.put('/links/:id', async (req, res) => {
+    const { id } = req.params;
+    const { url, name } = req.body;
+
+    try {
+        const updatedLink = await prisma.link.update({
+            where: { id: parseInt(id) },
+            data: { url, name },
+        });
+
+        res.json(updatedLink);
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Link not found' });
+        }
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
