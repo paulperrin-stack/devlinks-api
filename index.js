@@ -91,6 +91,24 @@ app.put('/links/:id', async (req, res) => {
     }
 });
 
+app.delete('/links/:id', async (req, res) => {
+    const { id } = req.params;
+
+    try {
+        const deletedLink = await prisma.link.delete({
+            where: { id: parseInt(id) },
+        });
+
+        res.json({ message: 'Link successfully deleted', deletedLink });
+    } catch (error) {
+        if (error.code === 'P2025') {
+            return res.status(404).json({ error: 'Link not found' });
+        }
+
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
