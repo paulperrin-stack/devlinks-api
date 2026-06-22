@@ -109,6 +109,30 @@ app.delete('/links/:id', async (req, res) => {
     }
 });
 
+app.get('/profile/:username', async (req, res) => {
+    const { username } = req.params;
+
+    try {
+        const profile = await prisma.user.findUnique({
+            where: { username: username },
+            select: {
+                id: true,
+                username: true,
+                avatarUrl: true,
+                links: true,
+            },
+        });
+
+        if (!profile) {
+            return res.status(404).json({ error: 'Profile not found' });
+        }
+
+        res.json(profile);
+    } catch (error) {
+        res.status(500).json({ error: 'An unexpected error occurred' });
+    }
+});
+
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`)
 })
